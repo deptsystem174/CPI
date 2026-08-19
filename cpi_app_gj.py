@@ -27,10 +27,9 @@ warnings.filterwarnings("ignore")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 st.set_page_config(
-    page_title="Quantum CPI Prediction Portal",
+    page_title="Q-CPID",
     page_icon="🧬",
     layout="wide",
-    initial_sidebar_state="expanded"
 )
 
 st.markdown(
@@ -39,10 +38,25 @@ st.markdown(
         html, body, [data-testid="stAppViewContainer"] {
             background: radial-gradient(circle at top, rgba(79, 70, 229, 0.32), transparent 35%),
                         linear-gradient(135deg, #050816 0%, #0b1022 40%, #111827 100%);
-            color: #edf6ff;
+                color: #ffffff;
         }
         .stApp {
             background: transparent;
+                color: #ffffff;
+        }
+        header[data-testid="stHeader"] {
+            background: transparent;
+        }
+        header[data-testid="stHeader"] [data-testid="stToolbar"],
+        [data-testid="stDecoration"] {
+            display: none;
+        }
+        .stMarkdown, .stMarkdown p, .stText, label,
+        [data-testid="stWidgetLabel"], [data-testid="stWidgetLabel"] p {
+                color: #ffffff !important;
+        }
+        [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {
+                color: #ffffff !important;
         }
         .block-container {
             padding-top: 1.2rem;
@@ -61,7 +75,7 @@ st.markdown(
         .sub-header {
             font-size: 1.4rem;
             font-weight: 700;
-            color: #dfe9ff;
+                color: #ffffff;
             margin-bottom: 0.9rem;
         }
         .hero-panel {
@@ -72,7 +86,7 @@ st.markdown(
             padding: 1.15rem 1.3rem;
             margin-bottom: 1rem;
             background-image: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.72)),
-                              url('https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=1600&q=80');
+                              url('https://www.dropbox.com/scl/fi/uhvdzarqh2lauoqsatdvr/banner.png?rlkey=zgwmvwm186tn3ovpwyskt1fcx&st=1mhq6c6k&dl=1');
             background-size: cover;
             background-position: center;
         }
@@ -82,7 +96,7 @@ st.markdown(
             box-shadow: 0 10px 30px rgba(15, 23, 42, 0.45);
             padding: 1rem 1.05rem;
             border-radius: 16px;
-            color: #eef2ff;
+                color: #ffffff;
         }
         .prediction-result {
             background: linear-gradient(135deg, rgba(99,102,241,0.9), rgba(168,85,247,0.9));
@@ -114,12 +128,22 @@ st.markdown(
         .stMultiSelect > div > div,
         .stNumberInput > div > div > input {
             background: rgba(15, 23, 42, 0.82);
-            color: #e2e8f0;
+            color: #ffffff !important;
             border: 1px solid rgba(148, 163, 184, 0.25);
             border-radius: 12px;
         }
+        .stSelectbox [data-baseweb="select"] *,
+        .stMultiSelect [data-baseweb="select"] *,
+        .stRadio label,
+        .stRadio label p,
+        .stRadio label span,
+        .stCheckbox label,
+        .stCheckbox label p,
+        .stCheckbox label span {
+                color: #ffffff !important;
+        }
         .stCheckbox > label {
-            color: #dbeafe;
+                color: #ffffff;
         }
         div[data-testid="stSidebar"] {
             background: rgba(2, 6, 23, 0.8);
@@ -128,7 +152,16 @@ st.markdown(
         .stAlert {
             background: rgba(59, 130, 246, 0.12);
             border: 1px solid rgba(96, 165, 250, 0.25);
-            color: #dbeafe;
+                color: #ffffff;
+        }
+        .stAlert *,
+        [data-testid="stMetricLabel"],
+        [data-testid="stMetricValue"],
+        [data-testid="stMetricDelta"],
+        .prediction-result h3,
+        .prediction-result p,
+        .prediction-result strong {
+            color: #ffffff !important;
         }
     </style>
     """,
@@ -159,6 +192,18 @@ def load_dataset_protein_presets():
         protein_presets.append({"gene_name": gene_name, "sequence": seq})
 
     return protein_presets
+
+
+DATASET_SMILES_SAMPLES = (
+    "N[C@@H](Cc1ccc(Br)cc1)C(=O)NO",
+    "FC(F)(F)C(=O)c1ccncc1NC(=O)c1ccnc(NC(=O)C2CC2)c1",
+    "CC(C)(C)OC(=O)Nc1ccc(cc1)-c1cn(CCC[C@H](NC(=O)OCC2c3ccccc3-c3ccccc23)C(O)=O)nn1",
+    "CC[C@@H](CS(=O)(=O)CC1(C)COC1)N1[C@@H]([C@H](C[C@](C)(CC(O)=O)C1=O)c1cccc(Cl)c1)c1ccc(Cl)cc1",
+    "COc1ncc(-c2cc3C(=O)N([C@H](c3n2C(C)C)c2ccc(cc2)C#N)c2cc(Cl)cn(C)c2=O)c(OC)n1",
+    "Cc1nc2N(Cc3cccc(c3)C(F)(F)F)C(=O)CSc2s1",
+    "COc1ccccc1-c1cc2C(=O)N(C(c2n1C(C)C)c1ccc(Cl)cc1)c1cc(Cl)c(=O)n(C)c1",
+    "CCC1(CC)N[C@H]([C@H](c2cccc(Cl)c2F)[C@]11C(=O)Nc2cc(Cl)ccc12)C(=O)N[C@H]1CC[C@H](O)CC1",
+)
 
 
 def smiles_to_graph(smiles):
@@ -421,9 +466,9 @@ def main():
     st.markdown(
         """
         <div class="hero-panel">
-            <h1 class="main-header">🧬 Quantum CPI Explorer</h1>
-            <p style="text-align:center; color:#dbeafe; margin:0; font-size:1.05rem;">
-                Dark-mode compound-protein interaction prediction with dataset-backed protein presets and a molecular graph builder.
+            <h1 class="main-header">🧬 Q-CPID</h1>
+            <p style="text-align:center; color:#ffffff; margin:0; font-size:1.05rem;">
+                Quantum-Driven Compound-Protein Interaction Prediction for Accelerating Breast Cancer Drug Discovery
             </p>
         </div>
         """,
@@ -436,24 +481,6 @@ def main():
         st.session_state.protein_input = ""
 
     protein_presets = load_dataset_protein_presets()
-    protein_options = [
-        {"gene_name": "Custom sequence", "sequence": ""}
-    ] + protein_presets
-
-    sidebar_col = st.sidebar
-    sidebar_col.markdown('<h2 class="sub-header">⚛️ Prediction Controls</h2>', unsafe_allow_html=True)
-    selected_protein = sidebar_col.selectbox(
-        "Choose dataset protein preset",
-        options=protein_options,
-        format_func=lambda item: item["gene_name"] if isinstance(item, dict) else item,
-    )
-
-    if selected_protein and selected_protein["sequence"]:
-        st.session_state.protein_input = selected_protein["sequence"]
-
-    st.sidebar.caption(
-        "Six embedded protein sequences matched to their gene symbols and UniProt accessions."
-    )
 
     col1, col2 = st.columns([1, 1])
 
@@ -462,6 +489,20 @@ def main():
         input_method = st.radio("Input Method", ["SMILES String", "Construct Molecule"], horizontal=True)
 
         if input_method == "SMILES String":
+            if DATASET_SMILES_SAMPLES:
+                selected_sample = st.selectbox(
+                    "Try a dataset sample",
+                    options=[""] + list(DATASET_SMILES_SAMPLES),
+                    format_func=lambda value: (
+                        "Choose a sample..."
+                        if not value
+                        else f"{value[:42]}..." if len(value) > 42 else value
+                    ),
+                )
+                if selected_sample:
+                    st.session_state.smiles_input = selected_sample
+                    st.session_state.smiles_text_area = selected_sample
+
             smiles_input = st.text_area(
                 "Enter SMILES String:",
                 value=st.session_state.smiles_input,
@@ -639,10 +680,11 @@ def main():
                     mode="gauge+number+delta",
                     value=prob * 100,
                     domain={"x": [0, 1], "y": [0, 1]},
-                    title={"text": "Interaction Probability (%)"},
-                    delta={"reference": 50},
+                    title={"text": "Interaction Probability (%)", "font": {"color": "#ffffff"}},
+                    number={"font": {"color": "#ffffff"}},
+                    delta={"reference": 50, "font": {"color": "#ffffff"}},
                     gauge={
-                        "axis": {"range": [0, 100]},
+                        "axis": {"range": [0, 100], "tickfont": {"color": "#ffffff"}},
                         "bar": {"color": "#8b5cf6"},
                         "steps": [
                             {"range": [0, 25], "color": "#1f2937"},
@@ -654,7 +696,13 @@ def main():
                     },
                 )
             )
-            fig.update_layout(height=360, margin={"t": 20, "b": 20, "l": 20, "r": 20}, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+            fig.update_layout(
+                height=360,
+                margin={"t": 20, "b": 20, "l": 20, "r": 20},
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font={"color": "#ffffff"},
+            )
             st.plotly_chart(fig, use_container_width=True)
         except Exception:
             pass
@@ -662,9 +710,9 @@ def main():
     st.markdown("---")
     st.markdown(
         """
-        <div style='text-align: center; color: #cbd5e1;'>
-            <p>🧬 Quantum CPI Prediction Portal</p>
-            <p>Built for the breast-cancer protein dataset and a quantum-inspired interaction model.</p>
+        <div style='text-align: center; color: #ffffff;'>
+            <p>🧬 Q-CPID</p>
+            <p>Developed by Bhomic Kaushik</p>
         </div>
         """,
         unsafe_allow_html=True,
